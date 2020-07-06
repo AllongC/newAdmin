@@ -3,28 +3,17 @@
     <el-aside width="200px">
       <h5>黑马头条</h5>
       <el-menu
-        default-active="2"
+        :default-active="$route.path"
         class="el-menu-vertical-demo"
-        @open="handleOpen"
-        @close="handleClose"
         background-color="#545c64"
         text-color="#fff"
         active-text-color="#ffd04b"
       >
-        <el-submenu index="1">
-          <template slot="title">
-            <span>导航一</span>
-          </template>
-          <el-menu-item-group>
-            <el-menu-item index="1-1">选项1</el-menu-item>
-            <el-menu-item index="1-2">选项2</el-menu-item>
-          </el-menu-item-group>
-        </el-submenu>
-        <el-menu-item index="2">
-          <span slot="title">导航二</span>
+        <el-menu-item index="/post" @click="nextStation('/post')">
+          <span slot="title">文章列表</span>
         </el-menu-item>
-        <el-menu-item index="4">
-          <span slot="title">导航四</span>
+        <el-menu-item index="/publish" @click="nextStation('/publish')">
+          <span slot="title">文章发布</span>
         </el-menu-item>
       </el-menu>
     </el-aside>
@@ -35,17 +24,31 @@
         <p>{{user.nickname}}</p>
         <button>退出</button>
       </el-header>
-      <el-main>Main</el-main>
+      <el-main>
+        <breadcrumb />
+        <router-view></router-view>
+      </el-main>
     </el-container>
   </el-container>
 </template>
 
 <script>
+import breadcrumb from "@/components/breadcrumb";
 export default {
+  components: {
+    breadcrumb
+  },
   data() {
     return {
       user: {}
     };
+  },
+  methods: {
+    nextStation(station) {
+      if (this.$route.path !== station) {
+        this.$router.push(station);
+      }
+    }
   },
   mounted() {
     const userInfo = localStorage.getItem("user");
@@ -93,13 +96,6 @@ export default {
   color: white;
   text-align: center;
   line-height: 60px;
-}
-
-.el-main {
-  background-color: #e9eef3;
-  color: #333;
-  text-align: center;
-  line-height: 160px;
 }
 
 body > .el-container {
