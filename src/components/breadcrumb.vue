@@ -1,23 +1,14 @@
 <template>
   <div class="breadcrumb">
-    <span v-for="(item,index) in path" :key="index">
+    <span v-for="(item,index) in $route.matched" :key="index">
       {{item.meta.name}}
-      <span v-if="index!==path.length-1">/</span>
+      <span v-if="index!==$route.matched.length-1">/</span>
     </span>
   </div>
 </template>
 
 <script>
-export default {
-  data() {
-    return {
-      path: []
-    };
-  },
-  mounted() {
-    this.path = this.$route.matched;
-  }
-};
+export default {};
 </script>
 
 <style lang="less" scoped>
