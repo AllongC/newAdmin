@@ -20,6 +20,7 @@
           list-type="picture-card"
           :on-success="successCover"
           :on-remove="removeCover"
+          :file-list="form.cover"
         >
           <i class="el-icon-plus"></i>
         </el-upload>
@@ -65,6 +66,26 @@ export default {
       const { data } = res.data;
       this.column = data;
     });
+    if (this.$route.query.id) {
+      this.$axios({
+        url: "/post/" + this.$route.query.id,
+        method: "get"
+      }).then(res => {
+        const { data } = res.data;
+        const newCover = data.cover.map(item => {
+          const cover = { ...item };
+          if (cover.url.indexOf("http") == -1) {
+            cover.url = this.$axios.defaults.baseURL + cover.url;
+          }
+          return cover;
+        });
+        data.cover = newCover;
+        this.checkList = data.categories.map(item => {
+          return item.id;
+        });
+        this.form = data;
+      });
+    }
   },
   watch: {
     checkList() {
