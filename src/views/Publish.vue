@@ -83,6 +83,7 @@ export default {
         this.checkList = data.categories.map(item => {
           return item.id;
         });
+        data.content = data.content.replace(/div/g, "p");
         this.form = data;
       });
     }
