@@ -5,14 +5,12 @@
         <el-input v-model="form.title"></el-input>
       </el-form-item>
       <el-form-item label="内容">
-        <VueEditor v-model="form.content" />
+        <VueEditor :useCustomImageHandler="true" @image-added="imageUpload" v-model="form.content" />
       </el-form-item>
 
       <el-form-item label="栏目">
         <el-checkbox-group v-model="checkList">
-          <el-checkbox label="1">复选框 A</el-checkbox>
-          <el-checkbox label="2">复选框 B</el-checkbox>
-          <el-checkbox label="3">复选框 C</el-checkbox>
+          <el-checkbox v-for="item in column" :key="item.id" :label="item.id">{{item.name}}</el-checkbox>
         </el-checkbox-group>
       </el-form-item>
       <el-form-item label="封面">
@@ -20,19 +18,20 @@
           :action="$axios.defaults.baseURL +'/upload'"
           :headers="{Authorization: 'Bearer '+token}"
           list-type="picture-card"
-          :on-success="success"
+          :on-success="successCover"
+          :on-remove="removeCover"
         >
           <i class="el-icon-plus"></i>
         </el-upload>
       </el-form-item>
       <el-form-item label="类型">
-        <el-checkbox-group v-model="form.type">
-          <el-checkbox label="1">文章</el-checkbox>
-          <el-checkbox label="2">视频</el-checkbox>
-        </el-checkbox-group>
+        <el-radio-group v-model="form.type">
+          <el-radio :label="1">文章</el-radio>
+          <el-radio :label="2">视频</el-radio>
+        </el-radio-group>
       </el-form-item>
       <el-form-item>
-        <el-button type="primary">发布</el-button>
+        <el-button type="primary" @click="sendData">发布</el-button>
       </el-form-item>
     </el-form>
   </div>
@@ -48,16 +47,67 @@ export default {
     return {
       token: localStorage.getItem("token"),
       checkList: [],
+      column: [],
       form: {
         title: "",
-        type: "",
-        content: ""
+        type: 1,
+        content: "",
+        cover: [],
+        categories: []
       }
     };
   },
+  mounted() {
+    this.$axios({
+      url: "/category",
+      method: "get"
+    }).then(res => {
+      const { data } = res.data;
+      this.column = data;
+    });
+  },
+  watch: {
+    checkList() {
+      this.form.categories = this.checkList.map(item => {
+        return {
+          id: item
+        };
+      });
+    }
+  },
   methods: {
-    success(res) {
-      console.log(res);
+    successCover(res, file, fileList) {
+      file.id = res.data.id;
+      this.form.cover.push(file);
+    },
+    removeCover(file, fileList) {
+      this.form.cover = fileList;
+    },
+    sendData() {
+      this.$axios({
+        url: "/post",
+        method: "post",
+        data: this.form
+      }).then(res => {
+        console.log(res);
+      });
+    },
+    imageUpload(file, Editor, cursorLocation, resetUploader) {
+      const data = new FormData();
+      data.append("file", file);
+      this.$axios({
+        url: "/upload",
+        method: "post",
+        data
+      }).then(res => {
+        const { url } = res.data.data;
+        Editor.insertEmbed(
+          cursorLocation,
+          "image",
+          this.$axios.defaults.baseURL + url
+        );
+        resetUploader();
+      });
     }
   }
 };

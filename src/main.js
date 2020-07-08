@@ -18,6 +18,14 @@ router.beforeEach((to, from, next) => {
   }
   next()
 })
+Vue.filter('addBaseURL', (url) => {
+  const reg = new RegExp(/^http/);
+  if (reg.test(url)) {
+    return url
+  } else {
+    return axios.defaults.baseURL + url
+  }
+})
 Vue.use(ElementUI);
 Vue.config.productionTip = false
 
